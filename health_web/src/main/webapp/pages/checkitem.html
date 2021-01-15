@@ -269,12 +269,17 @@
                   */
                     //目的：查询所有检查项
                     //发送异步请求
-                    axios.get('/checkitem/findAll.do').then(res=>{
-                        //res.data ==>代表后台的Result对象(Resutl对象有三个数据：flag，message，data)
+                    axios.post('/checkitem/findPage.do',this.pagination).then(res => {
+                       /* //res.data ==>代表后台的Result对象(Resutl对象有三个数据：flag，message，data)
+                       *   现在实现分页查询返回的Result数据包含 flag,message, data=>{totel,rows}
+                       *  其中rows 为查询到的分页数据集合  绑定的数据也就变成：res.data.data.rows
+                       */
                         //判断是否成功
                         if(res.data.flag){
-                            //如果成功，绑定数据到 this.data
-                            this.dataList=res.data.data;
+                            //如果成功，绑定数据到 this.dataList,
+                            this.dataList = res.data.data.rows;  //数据 data：{total,rows}
+                            //总记录数，绑定总记录数
+                            this.pagination.total = res.data.data.total;
                         }else {
                             //如果失败则提示错误信息
                             this.$message.error(res.data.message);
@@ -301,6 +306,13 @@
                 },
                 //切换页码
                 handleCurrentChange(currentPage) {
+                    //修改当前页码，
+                    // currentPage这个值是存储当前页的页数，当页数改变的时候currentPage也随之改变
+                    //因此修改pagination数据集合的页数，页数的改变是根据PageHelper分页插件，使用pagination对像传输数据
+                    this.pagination.currentPage=currentPage;
+                    //之后还要调用findPage方法，在查询一次，你不调用它就不会跳转页面
+                    this.findPage();
+
                 },
                 // 删除
                 handleDelete(row) {

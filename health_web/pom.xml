@@ -24,4 +24,19 @@
     </dependency>
   </dependencies>
 
+     <build>
+       <plugins>
+         <plugin>
+           <groupId>org.apache.tomcat.maven</groupId>
+           <artifactId>tomcat7-maven-plugin</artifactId>
+           <version>2.2</version>
+           <configuration>
+             <!--端口号-->
+             <port>20001</port>
+             <!--path就相当于部署项目时候的ContextPath-->
+             <path>/</path>
+           </configuration>
+         </plugin>
+       </plugins>
+     </build>
 </project>

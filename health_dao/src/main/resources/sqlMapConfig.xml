@@ -4,10 +4,13 @@
 
 <configuration>
     <plugins>
-        <!-- com.github.pagehelper 为 PageHelper 类所在包名 -->
+        <!-- com.github.pagehelper 为 PageHelper 类所在包名
+        这里是maven整合了 分页插件PageHelper介绍 -->
         <plugin interceptor="com.github.pagehelper.PageHelper">
             <!-- 设置数据库类型 Oracle,Mysql,MariaDB,SQLite,Hsqldb,PostgreSQL 六种数据库-->
             <property name="dialect" value="mysql"/>
+            <!--处理分页页码的边界值问题：值为-1，0等等，则 查询第一页，超过最大页面数时，则 查最后一页-->
+            <property name="reasonable" value="true"/>
         </plugin>
     </plugins>
 </configuration>
