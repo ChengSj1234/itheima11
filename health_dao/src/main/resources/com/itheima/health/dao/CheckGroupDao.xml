@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--不加 namespace属性会报错   忘记加了会报错  “Mapper's namespace cannot be empty”-->
+<mapper namespace="com.itheima.health.dao.CheckGroupDao">
+    <!-- keyProperty这个是用来指定实体类中的主键（是指数据库表的主键），
+    useGeneratedKeys使用自动生成的key（指的是）
+    这样做能够把 自增长的值给参数parameterType="checkgroup"
+    -->
+    <insert id="add" parameterType="checkgroup" keyProperty="id" useGeneratedKeys="true">
+        insert into t_checkgroup(code,name,helpCode,sex,remark,attention)
+        value(#{code},#{name},#{helpCode},#{sex},#{remark},#{attention});
+    </insert>
+
+    <!--注意：方法传入的参数 顺序和映射文件 的参数顺序必须一致，不然运行出错-->
+    <insert id="addCheckGroupCheckItem" parameterType="int">
+        insert into t_checkgroup_checkitem (checkgroup_id,checkitem_id)
+        value (#{checkgroupId},#{checkitemId})
+    </insert>
+</mapper>
