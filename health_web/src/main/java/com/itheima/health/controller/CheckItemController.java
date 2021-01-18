@@ -56,6 +56,11 @@ public class CheckItemController {
         return new Result(true,MessageConstant.ADD_CHECKITEM_SUCCESS);
     }
 
+    /**
+     * 检查项分页查询
+     * @param queryPageBean
+     * @return
+     */
     @PostMapping("/findPage")
     public  Result  findPage(@RequestBody QueryPageBean queryPageBean){
         //调用服务，分页查询

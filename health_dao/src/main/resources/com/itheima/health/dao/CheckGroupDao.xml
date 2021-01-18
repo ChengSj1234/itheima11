@@ -15,8 +15,45 @@
     </insert>
 
     <!--注意：方法传入的参数 顺序和映射文件 的参数顺序必须一致，不然运行出错-->
+    <!--这映射方法是添加检查组和检查项之间的关系的-->
     <insert id="addCheckGroupCheckItem" parameterType="int">
         insert into t_checkgroup_checkitem (checkgroup_id,checkitem_id)
         value (#{checkgroupId},#{checkitemId})
     </insert>
+    <!-- 分页查询   参数类型String，因为传来实参的是查询条件 查询条件是String类型-->
+    <!--返回值类型为 checkgroup,实际上是自定义类型 Javabean ：CheckGroup-->
+    <!--因为页面checkgroup.html上 查询有分页可以选三个条件：编码/名称/助记码 所以需要三个code ，name，helpCode模糊查询-->
+    <select id="findByCondition" parameterType="String" resultType="checkgroup">
+        select*from t_checkgroup
+        <where>
+            <if test="value!=null and value.length>0">
+                code like #{queryString} or name like #{queryString} or helpCode like #{queryString}
+            </if>
+        </where>
+    </select>
+    <!--通过id查询检查组  结果参数类型checkgroup是用来封装 检查组数据的JavaBean类-->
+    <select id="findById" parameterType="int" resultType="checkgroup">
+               select*from t_checkgroup where id= #{id}
+    </select>
+    <!--通过检查组id来查询选中的检查项id，绑定到checkitemIds-->
+    <select id="findCheckItemIdsByCheckGroupId" parameterType="int" resultType="int">
+        select checkitem_id from t_checkgroup_checkitem where checkgroup_id=#{id}
+    </select>
+
+    <update id="update" parameterType="checkgroup" >
+        update t_checkgroup
+        set
+           code=#{code},
+           name=#{name},
+           helpCode=#{helpCode},
+           sex=#{sex},
+           remark=#{remark},
+           attention=#{attention}
+        where id=#{id}
+    </update>
+    <delete id="deleteCheckGroupCheckItem" parameterType="int">
+        delete from t_checkgroup_checkitem where checkgroup_id=#{id}
+    </delete>
+
+
 </mapper>

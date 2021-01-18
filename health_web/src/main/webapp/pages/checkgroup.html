@@ -281,10 +281,26 @@
                 this.findPage();
             },
             methods: {
-                //编辑
+                //这个是检查组的【编辑】按钮绑定的方法，回显修改，修改之后的提交
                 handleEdit() {
+                    //打开编辑按钮，和添加差不多
+                    //修改检查组的提交
+                    axios.post('/checkgroup/update.do?checkitemIds='+this.checkitemIds,this.formData).then(res=>{
+                        this.$message({
+                            message:res.data.message,
+                            type:res.data.flag?"success":"error"
+                        });
+                        //如果成功
+                        if(res.data.flag=="success"){
+                            //如果成功 则关闭编辑窗口
+                            this.dialogFormVisible4Edit=false;
+                            //刷新列表数据引用findPage方法来实现刷新列表功能
+                            this.findPage();
+                        }
+                    })
                 },
-                //添加
+
+                //添加（新增的添加窗口的代码）
                 handleAdd () {
                     //这个是新建添加窗口 的【确定】按钮绑定的方法
                     //使用post请求时不仅可以选择响应的方法名，还可以提交其他数据
@@ -300,13 +316,31 @@
                             this.dialogFormVisible=false;
                             //刷新列表数据   引用findPage方法来实现刷新列表功能
                             this.findPage();
-
                         }
-
                     })
                 },
                 //分页查询
                 findPage() {
+                    /*
+                    findPage()这是检查组的分页查询方法
+                    %其中pagination是分页相关属性
+                    % .post('/checkgroup/findPage.do',this.pagination)这个是使用异步post请求，不用get请求
+                      因为post请求时可以传送参数 比如：pagination
+                    % .then( )是异步请求获取反馈响应之后  括号是响应之后要执行的操作
+                    */
+                    axios.post('/checkgroup/findPage.do',this.pagination).then(res=>{
+                        if(res.data.flag){
+                            //到这里表示 分页成功， 成功则绑定分页数据
+                            //res.data.data.rows是分页数据集合，其中返回的数据集合是Result 这里res.data是Result
+                            //Result包含三个数据flag，massage，data（flag：[false 或true],message:["失败或成功"]，和数据集data:[total：总条数， rows：分页数据集合]）
+                            this.dataList=res.data.data.rows;
+                            //总记录数
+                            this.pagination.total=res.data.data.total;
+                        }else {
+                            //失败 则提示失败
+                            this.$message.error(res.data.message);
+                        }
+                    })
                 },
                 // 重置表单
                 resetForm() {
@@ -336,14 +370,55 @@
                             this.$message.error(res.data.message);
                         }
                     })
-
-
                 },
                 // 弹出编辑窗口
                 handleUpdate(row) {
+                    //1.重置表单
+                    this.resetForm();
+                    //2.弹出编辑窗口(dialogFormVisible4Edit=true)
+                    //this ： 代表vue对象
+                    this.dialogFormVisible4Edit=true;
+                    //3.通过id查询检查组信息,并且把数据绑定到formData 表单
+                    var id=row.id;//拿到 选中的检查组的id
+                    axios.get('/checkgroup/findById.do?id=' + id).then(res=>{
+                        if(res.data.flag){
+                            this.formData=res.data.data;
+                            //构建查询项了列表，查询所有的检查项，绑定到检查项列表数据集tableData
+                            //写在这里是 不写成方法然后调用，是因为如果上面没有查到检查组就没必要查 检查项列表
+                            axios.get('/checkitem/findAll.do').then(res1=>{//res冲突的改为res1
+                                //在成功的情况下进行绑定检查项列表
+                                if(res1.data.flag){
+                                    //绑定检查项列表
+                                    this.tableData=res1.data.data;
+
+                                    axios.get('/checkgroup/findCheckItemIdsByCheckGroupId.do?id='+id).then(res2=>{
+                                        //回显检查项
+                                        //当成功绑定 检查项列表之后才能显示  勾选的选项，因此要在查询出来所有的检查项列表之后
+                                        //在查询  勾选中的id，并回显钩选中的检查项，发送请求，
+                                        // 通过检查组id来查询选中的检查项id，绑定到checkitemIds
+                                        if(res2.data.flag){
+                                            this.checkitemIds=res2.data.data;
+                                        }else{
+                                            this.$message.error(res2.data.message);
+                                        }
+                                    })
+                                }else{
+                                    //失败 错误时提示信息
+                                    this.$message.error(res1.data.message);
+                                }
+                            })
+                        }else {
+                            this.message.error(res.data.message);
+                        }
+                    })
                 },
                 //切换页码
                 handleCurrentChange(currentPage) {
+                // 形参currentPage是传进来的页码数
+                // 实现切换页码功能
+                    this.pagination.currentPage=currentPage;
+                //切换页码之后 再次执行分页查询
+                    this.findPage();
                 },
                 // 删除
                 handleDelete(row) {
